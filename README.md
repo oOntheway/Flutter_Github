@@ -15,4 +15,6 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-## 2019-10-06
+## Fork
+- `添加远程地址`: git remote add upstream https://github.com/oOntheway/Flutter_Github.git
+- `更新仓库`: git pull upstream master
