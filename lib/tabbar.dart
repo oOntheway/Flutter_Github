@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'pages/home.dart';
 
 class Tabbar extends StatefulWidget {
@@ -13,9 +12,11 @@ class _Tabbar extends State<Tabbar> {
 
   int _selectedIndex = 0;
 
-  RandomWords _r = new RandomWords();
-
-  List _widgetOptions = [];
+  final List<Widget> _widgetList = [
+    RandomWords(),
+    RandomWords(),
+    RandomWords()
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -26,11 +27,9 @@ class _Tabbar extends State<Tabbar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('BottomNavigationBar Sample'),
-      // ),
-      body: Center(
-        child: _tabbarBuild(),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _widgetList,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -52,15 +51,5 @@ class _Tabbar extends State<Tabbar> {
         onTap: _onItemTapped,
       ),
     );
-  }
-
-  Widget _tabbarBuild() {
-    _widgetOptions = [
-      _r,
-      Text('Favorite'),
-      Text('About')
-    ];
-
-    return _widgetOptions.elementAt(_selectedIndex);
   }
 }
