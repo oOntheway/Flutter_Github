@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_github/pages/test.dart';
 import 'pages/home.dart';
 
 class Tabbar extends StatefulWidget {
@@ -13,9 +14,9 @@ class _Tabbar extends State<Tabbar> {
   int _selectedIndex = 0;
 
   final List<Widget> _widgetList = [
-    RandomWords(),
-    RandomWords(),
-    RandomWords()
+    Home(),
+    Test(),
+    Test()
   ];
 
   void _onItemTapped(int index) {

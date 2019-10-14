@@ -1,19 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
+import 'package:flutter_github/manager/dio-manger.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
-class RandomWords extends StatefulWidget {
+class Home extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new RandomWordsState();
+    return new HomeState();
   }
 }
 
-class RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
+class HomeState extends State<Home> {
 
-  final _saved = new Set<WordPair>();
+  final _saved = new Set();
 
   final _biggerFont = const TextStyle(fontSize: 18.0);
+
+  List<Map<String, dynamic>> _list = new List();
+
+  void getData() {
+    print('get data');
+    DioManager
+      .getInstance()
+      .getHttp(
+        "/search/repositories",
+        { 'q': 'all', 'sort': 'starts' },
+        (data) {
+          List<Map<String, dynamic>> items = new List.from(data['items']);
+          print('type is ${items.runtimeType}');
+          setState(() {
+            _list = items;
+          });
+        }
+      );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,50 +52,56 @@ class RandomWordsState extends State<RandomWords> {
             ),
           ],
         ),
-        body: _buildSuggestions());
+        body: _buildSuggestions()
+    );
   }
 
   Widget _buildSuggestions() {
     return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: (context, i) {
-          // 在每一列之前，添加一个1像素高的分隔线widget
-          if (i.isOdd) return new Divider();
+      padding: const EdgeInsets.all(16.0),
+      itemBuilder: (context, i) {
+        // 在每一列之前，添加一个1像素高的分隔线widget
+        if (i.isOdd) return new Divider();
 
-          // 语法 "i ~/ 2" 表示i除以2，但返回值是整形（向下取整），比如i为：1, 2, 3, 4, 5
-          // 时，结果为0, 1, 1, 2, 2， 这可以计算出ListView中减去分隔线后的实际单词对数量
-          final index = i ~/ 2;
-          // 如果是建议列表中最后一个单词对
-          if (index >= _suggestions.length) {
-            // ...接着再生成10个单词对，然后添加到建议列表
-            _suggestions.addAll(generateWordPairs().take(10));
-          }
-          return _buildRow(_suggestions[index]);
-        },
-        itemCount: 25);
+        final index = i ~/ 2;
+        return _buildRow(_list[index]);
+      },
+      itemCount: _list.length > 0 ? 50 : 0
+    );
   }
 
-  Widget _buildRow(WordPair pair) {
-    final alreadySaved = _saved.contains(pair);
+  Widget _buildRow(item) {
+    final alreadySaved = _saved.contains(item);
+    final owner = item['owner'];
 
     return new ListTile(
       title: new Text(
-        pair.asPascalCase,
+        item['name'],
         style: _biggerFont
       ),
+      leading: Image.network(owner['avatar_url']),
       trailing: new Icon(
         alreadySaved ? Icons.favorite : Icons.favorite_border,
         color: alreadySaved ? Colors.red : null,
       ),
       onTap: () {
-        setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
-        });
+        _pushWebview(item);
       },
+    );
+  }
+
+  void _pushWebview(item) {
+    Navigator.of(context).push(
+      new MaterialPageRoute(
+        builder: (context) {
+          return new WebviewScaffold(
+            url: item['html_url'],
+            appBar: new AppBar(
+              title: new Text(item['name']),
+            ),
+          );
+        }
+      )
     );
   }
 
@@ -78,10 +109,10 @@ class RandomWordsState extends State<RandomWords> {
     Navigator.of(context).push(
       new MaterialPageRoute(
         builder: (context) {
-          final tiles = _saved.map((pair) {
+          final tiles = _saved.map((item) {
             return new ListTile(
               title: new Text(
-                pair.asPascalCase,
+                item['name'],
                 style: _biggerFont,
               )
             );
@@ -96,7 +127,7 @@ class RandomWordsState extends State<RandomWords> {
 
             return new Scaffold(
               appBar: new AppBar(
-                title: new Text('Saved Suggestions'),
+                title: new Text('Favorite'),
               ),
               body: new ListView(children: divided),
             );
