@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_github/pages/my_page.dart';
 import 'package:flutter_github/pages/test.dart';
 import 'pages/home.dart';
 
@@ -16,7 +17,7 @@ class _Tabbar extends State<Tabbar> {
   final List<Widget> _widgetList = [
     Home(),
     Test(),
-    Test()
+    MyPage()
   ];
 
   void _onItemTapped(int index) {
